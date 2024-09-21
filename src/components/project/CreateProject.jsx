@@ -19,6 +19,7 @@ const CreateProject = ({ closeModal }) => {
       id: projectList.length + 1,
       title: projectTitle,
       createdBy: owner,
+      tasks: []
     };
 
     setTimeout(() => {

@@ -42,7 +42,7 @@ export default function Home() {
           <MdOutlineAddBox size={25} />
           <p>New project</p>
         </button>
-        <div className="flex flex-wrap justify-evenly gap-4 lg:gap-6 my-4">
+        <div className="flex flex-wrap items-start justify-evenly gap-4 lg:gap-6 my-4">
           {loading ? (
             <Loader />
           ) : projectList?.length > 0 ? (
