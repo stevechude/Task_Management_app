@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
+/* :root {
   --background: #ffffff;
   --foreground: #171717;
 }
@@ -12,16 +12,18 @@
     --background: #0a0a0a;
     --foreground: #ededed;
   }
-}
+} */
 
 body {
-  color: var(--foreground);
-  background: var(--background);
+  color: #000;
+  background: #fff;
   font-family: Arial, Helvetica, sans-serif;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+.focused {
+  @apply bg-white text-[#0096c4] rounded-r-[30px] font-bold text-base w-full flex items-center gap-4 text-center pl-5 py-3;
+}
+
+.links {
+  @apply w-full flex items-center gap-4 text-center text-white font-bold py-3 hover:bg-white hover:text-[#0096c4] hover:rounded-r-2xl pl-5;
 }
