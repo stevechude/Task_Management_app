@@ -5,7 +5,7 @@ import CreateProject from "@/components/project/CreateProject";
 import { getStoredProjects } from "@/hooks/getProjectList";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { useEffect, useState } from "react";
-import { MdOutlineAddBox } from "react-icons/md";
+import { MdDeleteForever, MdOutlineAddBox } from "react-icons/md";
 import Loader from "@/components/loader/Loader";
 import { setProjectList } from "@/redux/features/projects/projectSlice";
 import Link from "next/link";
@@ -31,6 +31,14 @@ export default function Home() {
   }, [projectList]);
 
   console.log("log projects==", projectList);
+
+  const handleDelete = (id) => {
+    const updatedProjectList = projectList.filter((project) => project.id !== id);
+
+    dispatch(setProjectList(updatedProjectList));
+
+    localStorage.setItem("storedProjects", JSON.stringify(updatedProjectList));
+  };
 
   return (
     <>
@@ -60,12 +68,15 @@ export default function Home() {
                     Created By: <span>{proj.createdBy}</span>
                   </p>
                 </div>
-                <Link
-                  href={`/${proj.id}`}
-                  className="flex self-center items-center gap-2 text-white bg-gradient-to-r from-[#8168d4] to-[#41a4c8] rounded-3xl py-1.5 px-4 font-semibold w-fit m-4"
-                >
-                  View Project
-                </Link>
+                <div className="flex items-center justify-between m-4">
+                  <Link
+                    href={`/${proj.id}`}
+                    className="flex self-center items-center text-white bg-gradient-to-r from-[#8168d4] to-[#41a4c8] rounded-3xl py-1.5 px-4 font-semibold w-fit"
+                  >
+                    View Project
+                  </Link>
+                  <MdDeleteForever onClick={() => handleDelete(proj.id)} size={25} color="red" className="cursor-pointer" />
+                </div>
               </div>
             ))
           ) : (
