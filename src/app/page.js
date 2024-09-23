@@ -33,7 +33,9 @@ export default function Home() {
   console.log("log projects==", projectList);
 
   const handleDelete = (id) => {
-    const updatedProjectList = projectList.filter((project) => project.id !== id);
+    const updatedProjectList = projectList.filter(
+      (project) => project.id !== id
+    );
 
     dispatch(setProjectList(updatedProjectList));
 
@@ -45,7 +47,7 @@ export default function Home() {
       <div className="flex flex-col gap-3">
         <button
           onClick={() => setShowCreate(true)}
-          className="flex items-center gap-3 text-white bg-[#0096c4] rounded-xl py-2 px-4 self-end font-semibold mt-1"
+          className="flex items-center gap-3 text-white bg-[#0096c4] rounded-xl py-2 px-4 self-end font-semibold mt-1 transition-transform duration-300 transform hover:-translate-y-2"
         >
           <MdOutlineAddBox size={25} />
           <p>New project</p>
@@ -61,21 +63,29 @@ export default function Home() {
                 className="bg-white text-[#333] flex flex-col gap-3 rounded-lg max-w-full min-w-[20rem]"
               >
                 <div className="flex flex-col gap-2 p-4">
-                  <p>
-                    Project: <span>{proj.title}</span>
+                  <p className="font-bold">
+                    Project: <span className="font-normal">{proj.title}</span>
                   </p>
-                  <p>
-                    Created By: <span>{proj.createdBy}</span>
+                  <hr className="h-1 w-full bg-gradient-to-r from-[#8168d4] to-[#41a4c8]" />
+                  <p className="font-bold">
+                    Created By:{" "}
+                    <span className="font-normal">{proj.createdBy}</span>
                   </p>
                 </div>
                 <div className="flex items-center justify-between m-4">
                   <Link
                     href={`/${proj.id}`}
-                    className="flex self-center items-center text-white bg-gradient-to-r from-[#8168d4] to-[#41a4c8] rounded-3xl py-1.5 px-4 font-semibold w-fit"
+                    className="flex self-center items-center text-white bg-gradient-to-r from-[#8168d4] to-[#41a4c8] rounded-3xl py-1.5 px-4 font-semibold w-fit transition-transform duration-300 transform hover:-translate-y-2"
                   >
                     View Project
                   </Link>
-                  <MdDeleteForever onClick={() => handleDelete(proj.id)} size={25} color="red" className="cursor-pointer" />
+                  <div className="rounded-full hover:bg-red-500 hover:text-white">
+                    <MdDeleteForever
+                      onClick={() => handleDelete(proj.id)}
+                      size={30}
+                      className="cursor-pointer p-1 text-red-500 hover:text-white"
+                    />
+                  </div>
                 </div>
               </div>
             ))

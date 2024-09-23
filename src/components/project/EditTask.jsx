@@ -1,78 +1,92 @@
 "use client";
-import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import React, { useEffect, useRef, useState } from "react";
-import { setProjectList } from "@/redux/features/projects/projectSlice";
 import { Calendar } from "react-date-range";
 import { format } from "date-fns";
 
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
-import { useForm } from "react-hook-form";
 import { FaAngleDown } from "react-icons/fa6";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import { setProjectList } from "@/redux/features/projects/projectSlice";
 import { usePathname } from "next/navigation";
 
-const CreateTask = ({ onClose }) => {
-  const {
-    handleSubmit,
-    register,
-    reset,
-    formState: { errors, isSubmitting },
-  } = useForm({
-    mode: "onChange",
-  });
+const EditTask = ({ task, onClose }) => {
   const { projectList } = useAppSelector((state) => state.projects);
   const [loading, setLoading] = useState(false);
-  const [calendar, setCalendar] = useState("");
+  const [title, setTitle] = useState(task?.title || "");
+  const [description, setDescription] = useState(task?.description || "");
+  const [dueDate, setDueDate] = useState(task?.date || "");
+  const [assignedTo, setAssignedTo] = useState(task?.assignTo || "");
+  const [status, setStatus] = useState(task?.status || "");
   const [openDate, setOpenDate] = useState(false);
-  const dispatch = useAppDispatch();
   const calendarRef = useRef(null);
   const path = usePathname();
   const projectId = path.substring(path.lastIndexOf("/") + 1);
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
-    setCalendar(format(new Date(), "dd-MM-yyyy"));
+    // setCalendar(format(new Date(), "dd-MM-yyyy"));
 
     document.addEventListener("keydown", hideOnEscape, true);
     document.addEventListener("click", hideOnClickOutside, true);
   }, []);
 
   const handleSelectDate = (date) => {
-    setCalendar(format(date, "dd-MM-yyyy"));
+    setDueDate(format(date, "dd-MM-yyyy"));
     setOpenDate(false);
   };
 
-  const addTaskHandler = (data) => {
+  const handleSubmit = (e) => {
+    e.preventDefault();
     setLoading(true);
-    const findProject = projectList?.find((pr) => pr?.id == projectId);
-    console.log("show id==", projectId);
 
-    if (!findProject) {
-      console.log("Project not found!");
+    // Validate task data before proceeding
+    if (!title || !description || !dueDate || !assignedTo || !status) {
+      console.error("All task fields must be filled!");
       setLoading(false);
       return;
     }
 
-    // console.log("Found project:", findProject);
-    const uniqueId = Date.now();
-    console.log("unique id", uniqueId);
-
-    const body = {
-      id: uniqueId,
-      ...data,
+    const updatedTask = {
+      ...task,
+      title,
+      description,
+      date: dueDate,
+      assignTo: assignedTo,
+      status,
     };
 
-    const updatedProject = {
-      ...findProject,
-      tasks: [...findProject.tasks, body],
-    };
+    // Safely handle null or undefined projectList
+    if (!Array.isArray(projectList)) {
+      console.error("Project list is invalid or undefined.");
+      setLoading(false);
+      return;
+    }
+    console.log("updated task body==", updatedTask, projectList);
 
-    const updatedProjectList = projectList.map((proj) =>
-      proj.id == projectId ? updatedProject : proj
-    );
+    const updatedProjectList = projectList.map((project) => {
+      if (project.id == projectId) {
+        console.log("show proj in upd==", project);
+        // Ensure project has tasks array before mapping
+        const updatedTasks = Array.isArray(project.tasks)
+          ? project.tasks.map((t) => (t.id == task.id ? updatedTask : t))
+          : [updatedTask];
+
+        return {
+          ...project,
+          tasks: updatedTasks,
+        };
+      }
+      return project;
+    });
+
+    console.log("Updated project list==", updatedProjectList);
 
     setTimeout(() => {
+      // Dispatch an action to update the entire project list in Redux
       dispatch(setProjectList(updatedProjectList));
 
+      // Safely update localStorage
       localStorage.setItem(
         "storedProjects",
         JSON.stringify(updatedProjectList)
@@ -80,9 +94,9 @@ const CreateTask = ({ onClose }) => {
 
       console.log("Project list updated in localStorage:", updatedProjectList);
 
-      setLoading(false);
+      // Close the modal
       onClose();
-      reset();
+      setLoading(false);
     }, 2000);
   };
 
@@ -100,42 +114,34 @@ const CreateTask = ({ onClose }) => {
     <div className="bg-white p-8 rounded-xl w-[80vw] md:w-[50vw] lg:w-[25rem] overflow-auto">
       <div className="flex flex-col items-center gap-8">
         <h4 className="text-[#575D72] text-base lg:text-lg font-semibold">
-          Create New Task
+          Edit Task
         </h4>
 
         <form
-          onSubmit={handleSubmit(addTaskHandler)}
+          onSubmit={handleSubmit}
           className="flex flex-col items-center gap-4 text-sm md:text-base"
         >
           <div className="flex flex-col">
             <label className="text-[#0096c4]">Task Title:</label>
             <input
               type="text"
-              {...register("title", { required: true })}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
               placeholder="Title"
               className="border border-[#6C748B] rounded-md pl-2 py-3 w-[70vw] md:w-72 text-[#6C748B] text-sm lg:text-base"
             />
-            {errors.title && (
-              <span className="text-red-600 py-0.5 text-xs">
-                Title is required
-              </span>
-            )}
           </div>
           <div className="flex flex-col">
             <label className="text-[#0096c4]">Description:</label>
             <textarea
-              {...register("description", { required: true })}
-              placeholder="Describe the task here..."
               name="description"
               id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Describe the task here..."
               cols={2}
               className="border border-[#6C748B] rounded-md pl-2 py-3 w-[70vw] md:w-72 text-[#6C748B] text-sm lg:text-base"
             />
-            {errors.description && (
-              <span className="text-red-600 py-0.5 text-xs">
-                Description is required
-              </span>
-            )}
           </div>
           <div className="flex flex-col">
             <label className="text-[#0096c4]">Due Date:</label>
@@ -146,8 +152,7 @@ const CreateTask = ({ onClose }) => {
               >
                 <input
                   type="text"
-                  value={calendar}
-                  {...register("date", { required: true })}
+                  value={dueDate}
                   readOnly
                   className="w-[90%] h-full outline-none"
                 />
@@ -168,22 +173,19 @@ const CreateTask = ({ onClose }) => {
             <label className="text-[#0096c4]">Assigned To:</label>
             <input
               type="text"
-              {...register("assignTo", { required: true })}
+              value={assignedTo}
+              onChange={(e) => setAssignedTo(e.target.value)}
               placeholder="Enter name"
               className="border border-[#6C748B] rounded-md pl-2 py-3 w-[70vw] md:w-72 text-[#6C748B] text-sm lg:text-base"
             />
-            {errors.assignTo && (
-              <span className="text-red-600 py-0.5 text-xs">
-                Assign this task
-              </span>
-            )}
           </div>
           <div className="flex flex-col">
             <label className="text-[#0096c4]">Status:</label>
             <select
-              {...register("status", { required: true })}
               name="status"
               id="status"
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
               className="border border-[#6C748B] rounded-md pl-2 py-3 w-[70vw] md:w-72 text-[#6C748B] text-sm lg:text-base"
             >
               <option value="">pick status</option>
@@ -191,15 +193,10 @@ const CreateTask = ({ onClose }) => {
               <option value="In progress">In progress</option>
               <option value="Done">Done</option>
             </select>
-            {errors.status && (
-              <span className="text-red-600 py-0.5 text-xs">
-                Status is required``
-              </span>
-            )}
           </div>
           <button
             type="submit"
-            disabled={isSubmitting || loading}
+            disabled={loading}
             className="flex items-center justify-center text-white bg-[#0096c4] rounded-2xl py-1.5 px-4 font-semibold w-36"
           >
             {loading ? "Saving..." : "Save"}
@@ -210,4 +207,4 @@ const CreateTask = ({ onClose }) => {
   );
 };
 
-export default CreateTask;
+export default EditTask;

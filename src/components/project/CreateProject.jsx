@@ -8,27 +8,43 @@ const CreateProject = ({ closeModal }) => {
   const [projectTitle, setProjectTitle] = useState("");
   const [owner, setOwner] = useState("");
   const [loading, setLoading] = useState(false);
+  const [titleErr, setTitleErr] = useState("");
+  const [byErr, setByErr] = useState("");
   const dispatch = useAppDispatch();
 
   /* function to add project to the list */
   const addProjectHandler = (e) => {
     e.preventDefault();
-    setLoading(true);
+    if (!projectTitle) {
+      setTitleErr("title is required");
+      return;
+    }
+    if (!owner) {
+      setByErr("owner is required");
+      return;
+    }
 
-    const newProject = {
-      id: projectList.length + 1,
-      title: projectTitle,
-      createdBy: owner,
-      tasks: []
-    };
+    if (projectTitle && owner) {
+      setTitleErr("");
+      setByErr("");
 
-    setTimeout(() => {
-      dispatch(addProject(newProject));
-      setLoading(false);
-      setProjectTitle("");
-      setOwner("");
-      closeModal();
-    }, 2000);
+      setLoading(true);
+
+      const newProject = {
+        id: projectList.length + 1,
+        title: projectTitle,
+        createdBy: owner,
+        tasks: [],
+      };
+
+      setTimeout(() => {
+        dispatch(addProject(newProject));
+        setLoading(false);
+        setProjectTitle("");
+        setOwner("");
+        closeModal();
+      }, 2000);
+    }
   };
 
   return (
@@ -50,6 +66,9 @@ const CreateProject = ({ closeModal }) => {
               placeholder="Title"
               className="border border-[#6C748B] rounded-md pl-4 py-3 w-[70vw] md:w-72 text-[#6C748B] text-sm lg:text-base"
             />
+            {titleErr && (
+              <span className="text-red-500 text-xs">{titleErr}</span>
+            )}
           </div>
           <div className="flex flex-col">
             <label className="text-[#3D414F]">Managed By:</label>
@@ -60,6 +79,7 @@ const CreateProject = ({ closeModal }) => {
               placeholder="Jack dorsey"
               className="border border-[#6C748B] rounded-md pl-4 py-3 w-[70vw] md:w-72 text-[#6C748B] text-sm lg:text-base"
             />
+            {byErr && <span className="text-red-500 text-xs">{byErr}</span>}
           </div>
           <button
             type="submit"
