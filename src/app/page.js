@@ -47,7 +47,7 @@ export default function Home() {
       <div className="flex flex-col gap-3">
         <button
           onClick={() => setShowCreate(true)}
-          className="flex items-center gap-3 text-white bg-[#0096c4] rounded-xl py-2 px-4 self-end font-semibold mt-1 transition-transform duration-300 transform hover:-translate-y-2"
+          className="flex items-center gap-3 text-white bg-[#0096c4] rounded-xl py-2 px-4 self-end font-semibold mt-1 hover:bg-[#0096c4]/70"
         >
           <MdOutlineAddBox size={25} />
           <p>New project</p>
